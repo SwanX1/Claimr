@@ -1,0 +1,65 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "runClient",
+      "request": "launch",
+      "mainClass": "net.minecraftforge.userdev.LaunchTesting",
+      "projectName": "claimr",
+      "cwd": "${workspaceFolder}/run",
+      "vmArgs": "-Dforge.logging.console.level\u003ddebug -Dforge.logging.markers\u003dSCAN,REGISTRIES,REGISTRYDUMP",
+      "args": "",
+      "env": {
+        "MOD_CLASSES": "claimr%%${workspaceFolder}/bin/main:claimr%%${workspaceFolder}/bin/main",
+        "MCP_MAPPINGS": "snapshot_20201028-1.16.3",
+        "MCP_VERSION": "20201102.104115",
+        "FORGE_VERSION": "35.1.4",
+        "assetIndex": "1.16",
+        "assetDirectory": "/home/era/.gradle/caches/forge_gradle/assets",
+        "nativesDirectory": "${workspaceFolder}/build/natives",
+        "FORGE_GROUP": "net.minecraftforge",
+        "target": "fmluserdevclient",
+        "MC_VERSION": "1.16.4"
+      }
+    },
+    {
+      "type": "java",
+      "name": "runData",
+      "request": "launch",
+      "mainClass": "net.minecraftforge.userdev.LaunchTesting",
+      "projectName": "claimr",
+      "cwd": "${workspaceFolder}/run",
+      "vmArgs": "-Dforge.logging.console.level\u003ddebug -Dforge.logging.markers\u003dSCAN,REGISTRIES,REGISTRYDUMP",
+      "args": "--mod claimr --all --output /mnt/sda1/co/java/claimr/src/generated/resources --existing /mnt/sda1/co/java/claimr/src/main/resources",
+      "env": {
+        "MOD_CLASSES": "claimr%%${workspaceFolder}/bin/main:claimr%%${workspaceFolder}/bin/main",
+        "MCP_MAPPINGS": "snapshot_20201028-1.16.3",
+        "MCP_VERSION": "20201102.104115",
+        "FORGE_VERSION": "35.1.4",
+        "FORGE_GROUP": "net.minecraftforge",
+        "target": "fmluserdevdata",
+        "MC_VERSION": "1.16.4"
+      }
+    },
+    {
+      "type": "java",
+      "name": "runServer",
+      "request": "launch",
+      "mainClass": "net.minecraftforge.userdev.LaunchTesting",
+      "projectName": "claimr",
+      "cwd": "${workspaceFolder}/run",
+      "vmArgs": "-Dforge.logging.console.level\u003ddebug -Dforge.logging.markers\u003dSCAN,REGISTRIES,REGISTRYDUMP",
+      "args": "",
+      "env": {
+        "MOD_CLASSES": "claimr%%${workspaceFolder}/bin/main:claimr%%${workspaceFolder}/bin/main",
+        "MCP_MAPPINGS": "snapshot_20201028-1.16.3",
+        "MCP_VERSION": "20201102.104115",
+        "FORGE_VERSION": "35.1.4",
+        "FORGE_GROUP": "net.minecraftforge",
+        "target": "fmluserdevserver",
+        "MC_VERSION": "1.16.4"
+      }
+    }
+  ]
+}
