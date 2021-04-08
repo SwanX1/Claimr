@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 group = 'dev.cernavskis.claimr' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'claimr'
 
@@ -125,12 +125,10 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "claimr",
-            "Specification-Vendor": "claimrsareus",
-            "Specification-Version": "0.0.1-SNAPSHOT",
+            "Specification-Title": "Claimr",
+            "Specification-Vendor": "SwanX1",
+            "Specification-Version": "1.0.0",
             "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"claimrsareus",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

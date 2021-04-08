@@ -5,17 +5,15 @@ issueTrackerURL = "https://github.com/SwanX1/Claimr/issues"
 
 [[mods]]
 modId = "claimr"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0"
 displayName = "Claimr"
 updateJSONURL = "https://cernavskis.dev/api/claimr.json"
 displayURL = "https://github.com/SwanX1/Claimr"
-# A file name (in the root of the mod JAR) containing a logo for display
-#logoFile="examplemod.png"
-# A text field displayed in the mod UI
-#credits="Idea made when i was looking for a server-side claim mod"
+logoFile="claimr-logo.png"
 authors = "SwanX1"
 description = '''
-Idk
+A server-side chunk claiming mod akin to FTB Chunks, but is not required on the client.
+Made for the Slightly Vanilla Flavoured server.
 '''
 
 [[dependencies.claimr]]
