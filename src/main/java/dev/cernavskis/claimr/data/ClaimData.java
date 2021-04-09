@@ -127,6 +127,7 @@ public class ClaimData {
       JsonObject jsongroup = new JsonObject();
       JsonObject members = new JsonObject();
       group.members.forEach((uuid, rank) -> {
+        if (rank == 0) return;
         members.addProperty(uuid.toString(), rank);
       });
 
