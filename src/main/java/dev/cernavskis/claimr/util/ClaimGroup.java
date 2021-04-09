@@ -117,6 +117,16 @@ public class ClaimGroup {
     }
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof ClaimGroup) {
+      return this.id == ((ClaimGroup) obj).id;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
   public String toString() {
     return String.format("{ClaimGroup \"%s\" %s; %s Members}", getId(), isPersonal() ? "PERSONAL" : "GROUP", getMembersSize());
   }

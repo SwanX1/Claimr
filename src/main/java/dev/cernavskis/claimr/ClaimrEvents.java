@@ -5,8 +5,8 @@ import dev.cernavskis.claimr.util.ClaimGroup;
 import dev.cernavskis.claimr.util.ClaimrUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -121,9 +121,11 @@ public class ClaimrEvents {
       if (newGroup != oldGroup) {
         PlayerEntity player = (PlayerEntity) event.getEntity();
         if (newGroup == ClaimGroup.EVERYONE) {
-          player.sendStatusMessage(new StringTextComponent("Entering unclaimed land."), true);
+          player.sendStatusMessage(new TranslationTextComponent("claimr.tooltip.enterunclaimed"), true);
         } else {
-          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getName() + "\u00a7r's claim."), true);
+          player.sendStatusMessage(
+              new TranslationTextComponent("claimr.tooltip.enterclaimed", "\u00a76" + newGroup.getName() + "\u00a7r"),
+              true);
         }
       }
     }
@@ -131,6 +133,7 @@ public class ClaimrEvents {
 
   private void sendClaimAlert(PlayerEntity player, ClaimGroup group) {
     player.sendStatusMessage(
-        new StringTextComponent("This chunk is claimed by " + group.getName()).mergeStyle(TextFormatting.RED), true);
+        new TranslationTextComponent("claimr.tooltip.claimalert", group.getName()).mergeStyle(TextFormatting.RED),
+        true);
   }
 }

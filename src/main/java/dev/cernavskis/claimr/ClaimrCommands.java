@@ -11,7 +11,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
-import dev.cernavskis.claimr.data.ClaimData;
 import dev.cernavskis.claimr.util.ChunkDimPos;
 import dev.cernavskis.claimr.util.ClaimGroup;
 import dev.cernavskis.claimr.util.ClaimrUtil;
@@ -20,7 +19,6 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.GameProfileArgument;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -139,10 +137,10 @@ public class ClaimrCommands {
     ClaimGroup group = ClaimGroup.getGroup(id);
     if (group == null) {
       group = ClaimGroup.getOrCreateGroup(id, source.asPlayer(), false);
-      source.sendFeedback(new StringTextComponent("Created a new group with the name " + group.getName()), false);
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.group.create.success", group.getName()), false);
       return 1;
     } else {
-      source.sendErrorMessage(new StringTextComponent("The name you provided is already in use."));
+      source.sendErrorMessage(new TranslationTextComponent("claimr.commands.group.create.exists"));
       return 0;
     }
   }
@@ -160,10 +158,10 @@ public class ClaimrCommands {
 
     if (players.size() == 1) {
       source.sendFeedback(
-          new StringTextComponent("Added " + ((GameProfile) players.toArray()[0]).getName() + " to trusted players!"),
+          new TranslationTextComponent("claimr.commands.trust.single", ((GameProfile) players.toArray()[0]).getName()),
           false);
     } else {
-      source.sendFeedback(new StringTextComponent("Added " + players.size() + " players to trusted players!"), false);
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.trust.multiple", players.size()), false);
     }
     return 0;
   }
@@ -180,11 +178,10 @@ public class ClaimrCommands {
     }
 
     if (players.size() == 1) {
-      source.sendFeedback(new StringTextComponent(
-          "Removed " + ((GameProfile) players.toArray()[0]).getName() + " from trusted players!"), false);
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.untrust.single",
+          ((GameProfile) players.toArray()[0]).getName()), false);
     } else {
-      source.sendFeedback(new StringTextComponent("Removed " + players.size() + " players from trusted players!"),
-          false);
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.untrust.multiple", players.size()), false);
     }
     return 0;
   }
@@ -193,7 +190,7 @@ public class ClaimrCommands {
     CommandSource source = context.getSource();
 
     ClaimGroup group = ClaimGroup.getGroup(ClaimrUtil.getUUID(source.asPlayer()).toString());
-    source.sendFeedback(new StringTextComponent("Trusted Members, Total: " + group.members.size()), false);
+    source.sendFeedback(new TranslationTextComponent("claimr.commands.listtrusted.info", group.members.size()), false);
     group.members.forEach((memberuuid, rank) -> {
       source.sendFeedback(new StringTextComponent(ClaimrUtil.getPlayerName(memberuuid, true)), false);
     });
@@ -210,7 +207,7 @@ public class ClaimrCommands {
     CommandSource source = context.getSource();
     ClaimGroup group = ClaimGroup.getGroup(id);
     if (group == null) {
-      source.sendErrorMessage(new StringTextComponent("The group " + id + " does not exist!"));
+      source.sendErrorMessage(new TranslationTextComponent("claimr.commands.unclaimall.groupnotexist", id));
       return 0;
     }
     return unclaimall(context, group);
@@ -226,10 +223,11 @@ public class ClaimrCommands {
         }
       });
       final int endSize = Claimr.claimdata.data.size();
-      source.sendFeedback(new StringTextComponent("Unclaimed " + (startSize - endSize) + " chunks!"), false);
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.unclaimall.success", startSize - endSize),
+          false);
       return 1;
     } else {
-      source.sendErrorMessage(new StringTextComponent("You cannot manage this group!"));
+      source.sendErrorMessage(new TranslationTextComponent("claimr.commands.unclaimall.nopermission"));
       return 0;
     }
   }
@@ -245,14 +243,16 @@ public class ClaimrCommands {
     if (oldGroup != ClaimGroup.EVERYONE) {
       if (oldGroup.canManage(source.asPlayer())) {
         Claimr.claimdata.setGroup(pos, ClaimGroup.EVERYONE);
-        source.sendFeedback(new StringTextComponent("Unclaimed chunk [" + pos.toString() + "]"), false);
+        source.sendFeedback(new TranslationTextComponent("claimr.commands.unclaim.success", "[" + pos.toString() + "]"),
+            false);
         return 1;
       } else {
-        source.sendErrorMessage(new StringTextComponent("You cannot manage this group!"));
+        source
+            .sendErrorMessage(new TranslationTextComponent("claimr.commands.unclaim.nopermission", oldGroup.getName()));
         return 0;
       }
     } else {
-      source.sendErrorMessage(new StringTextComponent("This chunk is not claimed!"));
+      source.sendErrorMessage(new TranslationTextComponent("claimr.commands.unclaim.notclaimed"));
       return 0;
     }
   }
@@ -266,7 +266,7 @@ public class ClaimrCommands {
   private static int claim(CommandContext<CommandSource> context, String id) throws CommandSyntaxException {
     ClaimGroup group = ClaimGroup.getGroup(id);
     if (group == null) {
-      context.getSource().sendErrorMessage(new StringTextComponent("The group " + id + " does not exist!"));
+      context.getSource().sendErrorMessage(new TranslationTextComponent("command.claimr.claim.groupnotexist", id));
       return 0;
     } else {
       return claim(context, group);
@@ -285,15 +285,17 @@ public class ClaimrCommands {
     if (oldGroup == ClaimGroup.EVERYONE) {
       if (group.canManage(source.asPlayer())) {
         Claimr.claimdata.setGroup(pos, group);
-        source.sendFeedback(new StringTextComponent("Claimed chunk [" + pos.toString() + "] for " + group.getName()),
+        source.sendFeedback(
+            new TranslationTextComponent("command.claimr.claim.success", "[" + pos.toString() + "]", group.getName()),
             false);
         return 1;
       } else {
-        context.getSource().sendErrorMessage(new StringTextComponent("You cannot manage this group!"));
+        context.getSource()
+            .sendErrorMessage(new TranslationTextComponent("command.claimr.claim.nopermission", group.getName()));
         return 0;
       }
     } else {
-      context.getSource().sendErrorMessage(new StringTextComponent("This chunk is already claimed!"));
+      context.getSource().sendErrorMessage(new TranslationTextComponent("command.claimr.claim.claimed"));
       return 0;
     }
   }
@@ -301,19 +303,20 @@ public class ClaimrCommands {
   private static int claiminfo(CommandContext<CommandSource> context) {
     CommandSource source = context.getSource();
     ChunkDimPos pos = new ChunkDimPos(source.getWorld(), new BlockPos(source.getPos()));
-    source.sendFeedback(new StringTextComponent("Chunk Location: " + pos.toString()), false);
+    source.sendFeedback(new TranslationTextComponent("claimr.commands.claiminfo.location", "[" + pos.toString() + "]"),
+        false);
     ClaimGroup group = Claimr.claimdata.getGroup(pos);
-    source.sendFeedback(new StringTextComponent(
-        group == ClaimGroup.EVERYONE ? "This chunk is unclaimed" : "Claimed by: " + group.getName()), false);
+    if (group == ClaimGroup.EVERYONE) {
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.claiminfo.unclaimed"), false);
+    } else {
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.claiminfo.claimed", group.getName()), false);
+    }
     return 1;
   }
 
   private static int help(CommandContext<CommandSource> context) {
     CommandSource source = context.getSource();
-    source.sendFeedback(
-        new StringTextComponent(
-            "Documentation for this mod is available on the GitHub Wiki: https://github.com/SwanX1/Claimr/wiki"),
-        false);
+    source.sendFeedback(new TranslationTextComponent("claimr.commands.help"), false);
     return 1;
   }
 
@@ -323,19 +326,15 @@ public class ClaimrCommands {
 
   private static int info(CommandContext<CommandSource> context, boolean debug) {
     CommandSource source = context.getSource();
-    source.sendFeedback(new StringTextComponent("Claimr Version: " + Claimr.VERSION), false);
-    source.sendFeedback(new StringTextComponent("Mod made by SwanX1, logo made by Nekomaster1000"), false);
-    source.sendFeedback(new StringTextComponent("GitHub: https://github.com/SwanX1/Claimr"), false);
+    source.sendFeedback(new TranslationTextComponent("claimr.commands.info.version", Claimr.VERSION), false);
+    source.sendFeedback(new TranslationTextComponent("claimr.commands.info.credits"), false);
+    source.sendFeedback(new TranslationTextComponent("claimr.commands.info.github"), false);
     if (Claimr.ftbranks) {
-      source.sendFeedback(new StringTextComponent("FTB Ranks integration is enabled."), false);
+      source.sendFeedback(new TranslationTextComponent("claimr.commands.info.ftbranksintegration"), false);
     }
     if (debug) {
       source.sendFeedback(
-          new StringTextComponent(
-              "Claimr Directory: " + Claimr.claimdata.dataDirectory.resolve(ClaimData.DATA_DIR_NAME.toString())),
-          false);
-      source.sendFeedback(new StringTextComponent("Size of ChunkData: " + Claimr.claimdata.getSize() + " entries"),
-          false);
+          new TranslationTextComponent("claimr.commands.info.debug.entries", Claimr.claimdata.getSize()), false);
     }
     return 0;
   }

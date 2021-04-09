@@ -1,0 +1,41 @@
+{
+  "claimr.commands.claim.success": "Claimed chunk %s for group %s",
+  "claimr.commands.claim.groupnotexist": "Group %s doesn't exist",
+  "claimr.commands.claim.nopermission": "You cannot claim this chunk for group %s",
+  "claimr.commands.claim.claimed": "This chunk is already claimed!",
+
+  "claimr.commands.claiminfo.location": "Chunk Location: %s",
+  "claimr.commands.claiminfo.unclaimed": "This chunk is unclaimed",
+  "claimr.commands.claiminfo.claimed": "Claimed by %s",
+
+  "claimr.commands.group.create.success": "Created a new group with name %s",
+  "claimr.commands.group.create.exists": "The name you provided is already in use.",
+
+  "claimr.commands.help": "Documentation for this mod is available on the GitHub Wiki: https://github.com/SwanX1/Claimr/wiki",
+
+  "claimr.commands.info.version": "Claimr Version: %s",
+  "claimr.commands.info.credits": "Mod made by SwanX1, logo made by Nekomaster1000",
+  "claimr.commands.info.github": "GitHub: https://github.com/SwanX1/Claimr",
+  "claimr.commands.info.ftbranksintegration": "FTB Ranks integration is enabled.",
+  "claimr.commands.info.debug.entries": "ChunkData size: %s entries",
+
+  "claimr.commands.listtrusted.info": "Trusted Members, Total: %s",
+
+  "claimr.commands.trust.single": "Added %s to trusted players!",
+  "claimr.commands.trust.multiple": "Added %s players to trusted players!",
+
+  "claimr.commands.unclaim.success": "Unclaimed chunk %s",
+  "claimr.commands.unclaim.nopermission": "You cannot unclaim chunks for group %s",
+  "claimr.commands.unclaim.notclaimed": "This chunk is not claimed!",
+
+  "claimr.commands.unclaimall.success": "Unclaimed %s chunks",
+  "claimr.commands.unclaimall.groupnotexist": "Group %s doesn't exist",
+  "claimr.commands.unclaimall.nopermission": "You cannot unclaim chunks for group %s",
+
+  "claimr.commands.untrust.single": "Removed %s from trusted players!",
+  "claimr.commands.untrust.multiple": "Removed %s players from trusted players!",
+
+  "claimr.tooltip.claimalert": "This chunk is claimed by %s",
+  "claimr.tooltip.enterclaimed": "Entering %s's claim",
+  "claimr.tooltip.enterunclaimed": "Entering unclaimed land"
+}
