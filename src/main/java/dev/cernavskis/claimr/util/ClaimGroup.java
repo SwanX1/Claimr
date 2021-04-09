@@ -82,7 +82,7 @@ public class ClaimGroup {
   }
 
   public boolean isOwner(UUID uuid) {
-    return uuid == getOwner();
+    return uuid.equals(getOwner());
   }
 
   public int getRank(PlayerEntity player) {

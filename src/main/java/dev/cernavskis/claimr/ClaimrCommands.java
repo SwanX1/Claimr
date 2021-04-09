@@ -123,15 +123,14 @@ public class ClaimrCommands {
                   .executes(context -> info(context, BoolArgumentType.getBool(context, "debug"))) // /claimr info [<debug>]
               )
           )
-          .then(Commands.literal("ci")        .then(claiminfoCommandNode)) // /claimr ci          -> /claiminfo
-          .then(Commands.literal("claiminfo") .then(claiminfoCommandNode)) // /claimr claiminfo   -> /claiminfo
-          .then(Commands.literal("claim")     .then(claimCommand))         // /claimr claim       -> /claim
-          .then(Commands.literal("unclaim")   .then(unclaimCommand))       // /claimr unclaim     -> /unclaim
-          .then(Commands.literal("unclaimall").then(unclaimAllCommand))    // /claimr unclaimall  -> /unclaimall
-          .then(Commands.literal("trust")     .then(trustCommand))         // /claimr trust       -> /trust
-          .then(Commands.literal("untrust")   .then(untrustCommand))       // /claimr untrust     -> /untrust
-          .then(Commands.literal("listtrused").then(listtrustedCommand))   // /claimr listtrusted -> /listtrusted
-          .then(Commands.literal("group")     .then(groupCommand))         // /claimr group       -> /group
+          .then(claiminfoCommandNode) // /claimr claiminfo   -> /claiminfo
+          .then(claimCommand)         // /claimr claim       -> /claim
+          .then(unclaimCommand)       // /claimr unclaim     -> /unclaim
+          .then(unclaimAllCommand)    // /claimr unclaimall  -> /unclaimall
+          .then(trustCommand)         // /claimr trust       -> /trust
+          .then(untrustCommand)       // /claimr untrust     -> /untrust
+          .then(listtrustedCommand)   // /claimr listtrusted -> /listtrusted
+          .then(groupCommand)         // /claimr group       -> /group
       );
   }
 
