@@ -5,6 +5,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +20,9 @@ import com.google.gson.JsonObject;
 
 import dev.cernavskis.claimr.Claimr;
 import dev.cernavskis.claimr.util.ClaimGroup;
+import dev.cernavskis.claimr.util.ClaimrUtil;
 import dev.cernavskis.claimr.util.ChunkDimPos;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -176,5 +181,19 @@ public class ClaimData {
       data.put(pos, group);
     }
     return data.get(pos);
+  }
+
+  public String[] getManagingGroupNames(PlayerEntity player) {
+    return getManagingGroupNames(ClaimrUtil.getUUID(player));
+  }
+
+  public String[] getManagingGroupNames(UUID uuid) {
+    Collection<ClaimGroup> managingGroups = groups.values();
+    managingGroups.removeIf(group -> true);
+    List<String> managingGroupNames = new ArrayList<String>();
+    for (ClaimGroup group : managingGroups) {
+      managingGroupNames.add(group.getName());
+    }
+    return managingGroupNames.toArray(new String[0]);
   }
 }

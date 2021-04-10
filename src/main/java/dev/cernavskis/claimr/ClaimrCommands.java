@@ -41,6 +41,9 @@ public class ClaimrCommands {
           .executes(context -> claim(context))
           .then(
             Commands.argument("group", StringArgumentType.word())
+              .suggests((context, suggestions) ->
+                ISuggestionProvider.suggest(Claimr.claimdata.getManagingGroupNames(context.getSource().asPlayer()), suggestions)
+              )
               .executes(context -> claim(context, StringArgumentType.getString(context, "group")))
           )
       );
@@ -57,6 +60,9 @@ public class ClaimrCommands {
           .executes(context -> unclaimall(context))
           .then(
             Commands.argument("group", StringArgumentType.word())
+              .suggests((context, suggestions) ->
+                ISuggestionProvider.suggest(Claimr.claimdata.getManagingGroupNames(context.getSource().asPlayer()), suggestions)
+              )
               .executes(context -> unclaimall(context, StringArgumentType.getString(context, "group")))
           )
       );
