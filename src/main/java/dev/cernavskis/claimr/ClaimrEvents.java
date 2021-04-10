@@ -121,9 +121,9 @@ public class ClaimrEvents {
       if (newGroup != oldGroup) {
         PlayerEntity player = (PlayerEntity) event.getEntity();
         if (newGroup == ClaimGroup.EVERYONE) {
-          player.sendStatusMessage(new StringTextComponent("Entering unclaimed land."), true);
+          player.sendStatusMessage(new StringTextComponent("Entering unclaimed land"), true);
         } else {
-          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getName() + "\u00a7r's claim."), true);
+          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getName() + "\u00a7r's claim"), true);
         }
       }
     }

@@ -11,7 +11,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
-import dev.cernavskis.claimr.data.ClaimData;
 import dev.cernavskis.claimr.util.ChunkDimPos;
 import dev.cernavskis.claimr.util.ClaimGroup;
 import dev.cernavskis.claimr.util.ClaimrUtil;
@@ -20,10 +19,8 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.GameProfileArgument;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public class ClaimrCommands {
   public static void registerCommands(CommandDispatcher<CommandSource> dispatcher) {
@@ -303,17 +300,19 @@ public class ClaimrCommands {
     ChunkDimPos pos = new ChunkDimPos(source.getWorld(), new BlockPos(source.getPos()));
     source.sendFeedback(new StringTextComponent("Chunk Location: " + pos.toString()), false);
     ClaimGroup group = Claimr.claimdata.getGroup(pos);
-    source.sendFeedback(new StringTextComponent(
-        group == ClaimGroup.EVERYONE ? "This chunk is unclaimed" : "Claimed by: " + group.getName()), false);
+    if (group == ClaimGroup.EVERYONE) {
+      source.sendFeedback(new StringTextComponent("This chunk is unclaimed"), false);
+    } else {
+      source.sendFeedback(new StringTextComponent("Claimed by " + group.getName()), false);
+    }
     return 1;
   }
 
   private static int help(CommandContext<CommandSource> context) {
     CommandSource source = context.getSource();
     source.sendFeedback(
-        new StringTextComponent(
-            "Documentation for this mod is available on the GitHub Wiki: https://github.com/SwanX1/Claimr/wiki"),
-        false);
+      new StringTextComponent("Documentation for this mod is available on the GitHub Wiki: https://github.com/SwanX1/Claimr/wiki"),
+      false);
     return 1;
   }
 
@@ -330,12 +329,7 @@ public class ClaimrCommands {
       source.sendFeedback(new StringTextComponent("FTB Ranks integration is enabled."), false);
     }
     if (debug) {
-      source.sendFeedback(
-          new StringTextComponent(
-              "Claimr Directory: " + Claimr.claimdata.dataDirectory.resolve(ClaimData.DATA_DIR_NAME.toString())),
-          false);
-      source.sendFeedback(new StringTextComponent("Size of ChunkData: " + Claimr.claimdata.getSize() + " entries"),
-          false);
+      source.sendFeedback(new StringTextComponent("Size of ClaimData: " + Claimr.claimdata.getSize() + " entries"), false);
     }
     return 0;
   }
