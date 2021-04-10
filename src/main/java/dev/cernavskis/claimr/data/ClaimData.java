@@ -24,6 +24,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.FolderName;
 
 public class ClaimData {
+  public static final FolderName DATA_DIR_NAME = new FolderName("data");
   public static final Map<String, ClaimGroup> groups = new ConcurrentHashMap<String, ClaimGroup>();
   public Map<ChunkDimPos, ClaimGroup> data = new ConcurrentHashMap<ChunkDimPos, ClaimGroup>();
   private static Gson GSON = new GsonBuilder().setPrettyPrinting().setLenient().serializeNulls().disableHtmlEscaping().create();
@@ -39,7 +40,7 @@ public class ClaimData {
   public void init() {
     if (initialized) return;
     initialized = false;
-    dataDirectory = server.func_240776_a_(new FolderName("data"));
+    dataDirectory = server.func_240776_a_(DATA_DIR_NAME);
 
     try {
       Files.createDirectories(dataDirectory);
