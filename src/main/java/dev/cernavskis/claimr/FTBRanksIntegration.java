@@ -1,3 +1,4 @@
+// This is free and unencumbered software released into the public domain.
 package dev.cernavskis.claimr;
 
 import com.feed_the_beast.mods.ftbranks.api.FTBRanksAPI;

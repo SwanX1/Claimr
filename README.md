@@ -3,6 +3,8 @@
 **Idea inspired by FTB Chunks**
 **This mod is server-side**
 
+**By contributing to this project, you agree to release your work into the public domain.**
+
 ### Data format
 This mod saves data for this mod in `world/data/claimr.json`, under the following format:
 
