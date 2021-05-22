@@ -8,7 +8,7 @@
 ### Data format
 This mod saves data for this mod in `world/data/claimr.json`, under the following format:
 
-```json
+```json5
 {
   "chunks": {
     "dimension;chunk_x:chunk_z": "group_name"

@@ -116,8 +116,8 @@ public class ClaimrEvents {
   public void enterChunk(EntityEvent.EnteringChunk event) {
     if (event.getEntity() instanceof PlayerEntity) {
       World world = event.getEntity().getEntityWorld();
-      BlockPos newPos = new BlockPos(event.getNewChunkX() << 16, 0, event.getNewChunkZ() << 16);
-      BlockPos oldPos = new BlockPos(event.getOldChunkX() << 16, 0, event.getOldChunkZ() << 16);
+      BlockPos newPos = new BlockPos(event.getNewChunkX() << 4, 0, event.getNewChunkZ() << 4);
+      BlockPos oldPos = new BlockPos(event.getOldChunkX() << 4, 0, event.getOldChunkZ() << 4);
       IClaimGroup newGroup = DATA.getGroup(world, newPos);
       IClaimGroup oldGroup = DATA.getGroup(world, oldPos);
       if (newGroup != oldGroup) {
