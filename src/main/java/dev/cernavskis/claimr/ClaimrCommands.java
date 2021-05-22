@@ -30,6 +30,10 @@ public class ClaimrCommands {
   public static CompletableFuture<Suggestions> suggestManagingGroups(CommandContext<CommandSource> context, SuggestionsBuilder suggestions) throws CommandSyntaxException {
     return ISuggestionProvider.suggest(Claimr.DATA.getManagingGroupIds(context.getSource().asPlayer()), suggestions);
   }
+  
+  public static CompletableFuture<Suggestions> suggestOwningGroups(CommandContext<CommandSource> context, SuggestionsBuilder suggestions) throws CommandSyntaxException {
+    return ISuggestionProvider.suggest(Claimr.DATA.getOwningGroupIds(context.getSource().asPlayer()), suggestions);
+  }
 
   public static void registerCommands(CommandDispatcher<CommandSource> dispatcher) {
     LiteralCommandNode<CommandSource> claiminfoCommandNode =
@@ -91,6 +95,57 @@ public class ClaimrCommands {
                   )
               )
           )
+          .then(
+            Commands.literal("remove")
+              .then(
+                Commands.argument("group", StringArgumentType.word())
+                  .suggests(ClaimrCommands::suggestManagingGroups)
+                  .then(
+                    Commands.argument("players", EntityArgument.players())
+                      .executes(context ->
+                        groupRemoveMember(
+                          context,
+                          StringArgumentType.getString(context, "group"),
+                          EntityArgument.getPlayers(context, "players")
+                        )
+                      )
+                  )
+              )
+          )
+          .then(
+            Commands.literal("promote")
+              .then(
+                Commands.argument("group", StringArgumentType.word())
+                  .suggests(ClaimrCommands::suggestOwningGroups)
+                  .then(
+                    Commands.argument("players", EntityArgument.players())
+                      .executes(context ->
+                        groupPromoteMember(
+                          context,
+                          StringArgumentType.getString(context, "group"),
+                          EntityArgument.getPlayers(context, "players")
+                        )
+                      )
+                  )
+              )
+          )
+          .then(
+            Commands.literal("demote")
+              .then(
+                Commands.argument("group", StringArgumentType.word())
+                  .suggests(ClaimrCommands::suggestOwningGroups)
+                  .then(
+                    Commands.argument("players", EntityArgument.players())
+                      .executes(context ->
+                        groupDemoteMember(
+                          context,
+                          StringArgumentType.getString(context, "group"),
+                          EntityArgument.getPlayers(context, "players")
+                        )
+                      )
+                  )
+              )
+          )
       );
 
     LiteralCommandNode<CommandSource> baseCommand =
@@ -143,6 +198,105 @@ public class ClaimrCommands {
         return 1;
       } else {
         source.sendErrorMessage(new StringTextComponent("You are not a group manager!"));
+        return 0;
+      }
+    } else {
+      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      return 0;
+    }
+  }
+  
+  private static int groupRemoveMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+    CommandSource source = context.getSource();
+    IClaimGroup group = ClaimGroup.getGroup(id);
+    if (group != null) {
+      PlayerEntity executingPlayer = source.asPlayer();
+      if (group.canManage(executingPlayer)) {
+        if (players.size() == 1) {
+          PlayerEntity player = players.iterator().next();
+          if (group.getRank(player) == 1) {
+            group.setRank(player, 0);
+          }
+          source.sendFeedback(new StringTextComponent("Removed member " + ClaimrUtil.getPlayerName(player, true) + " from group."), false);
+        } else {
+          int demotedPlayers = 0;
+          for (PlayerEntity player : players) {
+            if (group.getRank(player) == 1) {
+              group.setRank(player, 0);
+              demotedPlayers++;
+            }
+          }
+          source.sendFeedback(new StringTextComponent("Removed " + demotedPlayers + " players from group."), false);
+        }
+        return 1;
+      } else {
+        source.sendErrorMessage(new StringTextComponent("You are not a group manager!"));
+        return 0;
+      }
+    } else {
+      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      return 0;
+    }
+  }
+  
+  private static int groupPromoteMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+    CommandSource source = context.getSource();
+    IClaimGroup group = ClaimGroup.getGroup(id);
+    if (group != null) {
+      PlayerEntity executingPlayer = source.asPlayer();
+      if (group.isOwner(executingPlayer)) {
+        if (players.size() == 1) {
+          PlayerEntity player = players.iterator().next();
+          if (group.getRank(player) < 2) {
+            group.setRank(player, 2);
+          }
+          source.sendFeedback(new StringTextComponent("Promoted player " + ClaimrUtil.getPlayerName(player, true) + " to manager."), false);
+        } else {
+          int addedPlayers = 0;
+          for (PlayerEntity player : players) {
+            if (group.getRank(player) < 2) {
+              group.setRank(player, 2);
+              addedPlayers++;
+            }
+          }
+          source.sendFeedback(new StringTextComponent("Promoted " + addedPlayers + " players to managers."), false);
+        }
+        return 1;
+      } else {
+        source.sendErrorMessage(new StringTextComponent("You are not the group owner!"));
+        return 0;
+      }
+    } else {
+      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      return 0;
+    }
+  }
+
+  private static int groupDemoteMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+    CommandSource source = context.getSource();
+    IClaimGroup group = ClaimGroup.getGroup(id);
+    if (group != null) {
+      PlayerEntity executingPlayer = source.asPlayer();
+      if (group.isOwner(executingPlayer)) {
+        if (players.size() == 1) {
+          PlayerEntity player = players.iterator().next();
+          if (group.getRank(player) > 1) {
+            group.setRank(player, 1);
+          }
+          source.sendFeedback(new StringTextComponent("Demoted manager " + ClaimrUtil.getPlayerName(player, true) + " to member."), false);
+        } else {
+          int demotedPlayers = 0;
+          for (PlayerEntity player : players) {
+            if (group.getRank(player) > 1) {
+              group.setRank(player, 1);
+              demotedPlayers++;
+            }
+          }
+          source.sendFeedback(new StringTextComponent("Demoted " + demotedPlayers + " players to member."), false);
+        }
+        return 1;
+      } else {
+        source.sendErrorMessage(new StringTextComponent("You are not the group owner!"));
         return 0;
       }
     } else {

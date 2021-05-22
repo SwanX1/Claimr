@@ -104,4 +104,19 @@ This mod saves data for this mod in `world/data/claimr.json`, under the followin
 - Adds members to group, will not overwrite rank,
   throws error if group doesn't exist
   or if your rank is too low (needs to be >1)
+
+/group remove &lt;group&gt; &lt;...players&gt;
+- Removes members from group, will not remove managers, unless you're the owner,
+  throws error if group doesn't exist
+  or if your rank is too low (needs to be >1)
+
+/group promote &lt;group&gt; &lt;...players&gt;
+- Promotes members in group,
+  throws error if group doesn't exist
+  or if your rank is too low (needs to be >2)
+
+/group demote &lt;group&gt; &lt;...players&gt;
+- Demotes members in group,
+  throws error if group doesn't exist
+  or if your rank is too low (needs to be >2)
 </pre>

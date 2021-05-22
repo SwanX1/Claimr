@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -188,8 +189,24 @@ public class ClaimData {
   }
 
   public String[] getManagingGroupIds(UUID uuid) {
+    return getGroupIds(group -> group.canManage(uuid));
+  }
+
+  public String[] getOwningGroupIds(PlayerEntity player) {
+    return getOwningGroupIds(ClaimrUtil.getUUID(player));
+  }
+
+  public String[] getOwningGroupIds(UUID uuid) {
+    return getGroupIds(group -> group.isOwner(uuid));
+  }
+
+  public String[] getGroupIds() {
+    return getGroupIds(group -> true);
+  }
+
+  public String[] getGroupIds(Predicate<IClaimGroup> filter) {
     Collection<IClaimGroup> managingGroups = groups.values();
-    managingGroups.removeIf(group -> true);
+    managingGroups.removeIf(filter.negate());
     List<String> managingGroupNames = new ArrayList<String>();
     for (IClaimGroup group : managingGroups) {
       managingGroupNames.add(group.getId());
