@@ -24,6 +24,22 @@ public class ClaimrUtil {
   }
 
   /**
+   * Shorthand for getPlayerName(player, false);
+   */
+  @Nullable
+  public static String getPlayerName(PlayerEntity player) {
+    return getPlayerName(player, false);
+  }
+
+  /**
+   * Shorthand for getPlayerName(player, returnUUID);
+   */
+  @Nullable
+  public static String getPlayerName(PlayerEntity player, boolean returnUUID) {
+    return getPlayerName(getUUID(player), returnUUID);
+  }
+
+  /**
    * Shorthand for getPlayerName(uuid, false);
    */
   @Nullable
@@ -41,7 +57,7 @@ public class ClaimrUtil {
    */
   @Nullable
   public static String getPlayerName(UUID uuid, boolean returnUUID) {
-    GameProfile profile = SERVER_INSTANCE.getPlayerProfileCache().getProfileByUUID(uuid);
+    GameProfile profile = getPlayerProfile(uuid);
     if (profile == null) {
       if (returnUUID) {
         return uuid.toString();
@@ -53,6 +69,11 @@ public class ClaimrUtil {
     }
   }
 
+  /**
+   * Gets player GameProfile by UUID from cache.
+   * @return
+   *  null if there is no entry
+   */
   @Nullable
   public static GameProfile getPlayerProfile(UUID uuid) {
     return SERVER_INSTANCE.getPlayerProfileCache().getProfileByUUID(uuid);

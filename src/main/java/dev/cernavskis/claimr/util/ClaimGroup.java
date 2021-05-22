@@ -7,43 +7,39 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableMap;
+
 import dev.cernavskis.claimr.Claimr;
 import dev.cernavskis.claimr.data.ClaimData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
 
-public class ClaimGroup {
-  public static final ClaimGroup EVERYONE = new EveryoneClaimGroup();
+public class ClaimGroup implements IClaimGroup {
+  public static final IClaimGroup EVERYONE = new EveryoneClaimGroup();
   public Map<UUID, Integer> members = new HashMap<UUID, Integer>();
   private final String id;
   private final UUID owner;
-  private final boolean personal;
 
-  protected ClaimGroup(String idIn, UUID uuid, boolean personalIn) {
+  protected ClaimGroup(String idIn, UUID uuid) {
     id = idIn;
     owner = uuid;
-    personal = personalIn;
   }
 
   @Nullable
-  public static ClaimGroup getGroup(String id) {
+  public static IClaimGroup getGroup(String id) {
     return ClaimData.groups.get(id);
   }
 
-  public static ClaimGroup getOrCreateGroup(String id, PlayerEntity owner, boolean personal) {
-    return getOrCreateGroup(id, ClaimrUtil.getUUID(owner), personal);
+  public static IClaimGroup getOrCreateGroup(String id, PlayerEntity owner) {
+    return getOrCreateGroup(id, ClaimrUtil.getUUID(owner));
   }
 
-  public static ClaimGroup getOrCreateGroup(String id, UUID owner, boolean personal) {
+  public static IClaimGroup getOrCreateGroup(String id, UUID owner) {
     if (!ClaimData.groups.containsKey(id)) {
-      Claimr.claimdata.shouldSave = true;
-      ClaimData.groups.put(id, new ClaimGroup(id, owner, personal));
+      Claimr.DATA.shouldSave = true;
+      ClaimData.groups.put(id, new ClaimGroup(id, owner));
     }
     return ClaimData.groups.get(id);
-  }
-
-  public String getName() {
-    return isPersonal() ? ClaimrUtil.getPlayerName(getOwner(), true) : getId();
   }
 
   public String getId() {
@@ -52,10 +48,6 @@ public class ClaimGroup {
 
   public UUID getOwner() {
     return owner;
-  }
-
-  public boolean isPersonal() {
-    return personal;
   }
 
   public int getMembersSize() {
@@ -102,7 +94,7 @@ public class ClaimGroup {
     if (isOwner(uuid)) {
       return 3;
     }
-    if ((isPersonal() ? rank > 1 : rank > 2) || rank < 0) {
+    if (rank < 0 || rank > 2) {
       return getRank(uuid);
     } else {
       if (getRank(uuid) > 0) {
@@ -129,16 +121,22 @@ public class ClaimGroup {
 
   @Override
   public String toString() {
-    return String.format("{ClaimGroup \"%s\" %s; %s Members}", getId(), isPersonal() ? "PERSONAL" : "GROUP", getMembersSize());
+    return String.format("{ClaimGroup \"%s\"; %s Members}", getId(), getMembersSize());
+  }
+
+  public ImmutableMap<UUID, Integer> getMembers() {
+    return ImmutableMap.copyOf(this.members);
   }
 
   /**
    * Utility class for a static field that allows everyone to interact with a claim, but no one to edit it.
    */
-  private static class EveryoneClaimGroup extends ClaimGroup {
+  private static final class EveryoneClaimGroup implements IClaimGroup {
+    private String id;
+
     public EveryoneClaimGroup() {
-      super("everyone", Util.DUMMY_UUID, false);
-      ClaimData.groups.put("everyone", this);
+      this.id = "everyone";
+      ClaimData.groups.put(this.getId(), this);
     }
 
     @Override
@@ -194,6 +192,21 @@ public class ClaimGroup {
     @Override
     public int setRank(UUID uuid, int rank) {
       return 1;
+    }
+
+    @Override
+    public String getId() {
+      return this.id;
+    }
+
+    @Override
+    public UUID getOwner() {
+      return Util.DUMMY_UUID;
+    }
+
+    @Override
+    public ImmutableMap<UUID, Integer> getMembers() {
+      return ImmutableMap.of();
     }
   }
 }

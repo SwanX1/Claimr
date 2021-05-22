@@ -4,6 +4,7 @@ package dev.cernavskis.claimr;
 import dev.cernavskis.claimr.data.ClaimData;
 import dev.cernavskis.claimr.util.ClaimGroup;
 import dev.cernavskis.claimr.util.ClaimrUtil;
+import dev.cernavskis.claimr.util.IClaimGroup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
@@ -27,19 +28,19 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 @Mod.EventBusSubscriber(modid = Claimr.ID)
 public class ClaimrEvents {
-  public static ClaimData claimdata;
+  public static ClaimData DATA;
 
   @SubscribeEvent
   public void server(FMLServerAboutToStartEvent event) {
     ClaimrUtil.SERVER_INSTANCE = event.getServer();
-    Claimr.claimdata = new ClaimData(event.getServer());
-    ClaimrEvents.claimdata = Claimr.claimdata;
+    Claimr.DATA = new ClaimData(event.getServer());
+    ClaimrEvents.DATA = Claimr.DATA;
   }
 
   @SubscribeEvent
   public void init(FMLServerStartingEvent event) {
     Claimr.ftbranks = ModList.get().isLoaded("ftbranks");
-    claimdata.init();
+    DATA.init();
   }
 
   @SubscribeEvent
@@ -49,12 +50,12 @@ public class ClaimrEvents {
 
   @SubscribeEvent
   public void saveWorld(WorldEvent.Save event) {
-    claimdata.save();
+    DATA.save();
   }
 
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void leftClick(PlayerInteractEvent.LeftClickBlock event) {
-    ClaimGroup group = claimdata.getGroup(event.getWorld(), event.getPos());
+    IClaimGroup group = DATA.getGroup(event.getWorld(), event.getPos());
     if (!group.canInteract(event.getPlayer())) {
       sendClaimAlert(event.getPlayer(), group);
       event.setCanceled(true);
@@ -63,7 +64,7 @@ public class ClaimrEvents {
 
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void rightClick(PlayerInteractEvent.RightClickBlock event) {
-    ClaimGroup group = claimdata.getGroup(event.getWorld(), event.getPos());
+    IClaimGroup group = DATA.getGroup(event.getWorld(), event.getPos());
     if (!group.canInteract(event.getPlayer())) {
       sendClaimAlert(event.getPlayer(), group);
       event.setCanceled(true);
@@ -73,7 +74,7 @@ public class ClaimrEvents {
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void farmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
     if (event.getEntity() instanceof PlayerEntity) {
-      ClaimGroup group = claimdata.getGroup((World) event.getWorld(), event.getPos());
+      IClaimGroup group = DATA.getGroup((World) event.getWorld(), event.getPos());
       if (!group.canInteract((PlayerEntity) event.getEntity())) {
         sendClaimAlert((PlayerEntity) event.getEntity(), group);
         event.setCanceled(true);
@@ -84,7 +85,7 @@ public class ClaimrEvents {
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void itemPickup(EntityItemPickupEvent event) {
     if (event.getPlayer() != null) {
-      ClaimGroup group = claimdata.getGroup(event.getItem().getEntityWorld(), event.getItem().getPosition());
+      IClaimGroup group = DATA.getGroup(event.getItem().getEntityWorld(), event.getItem().getPosition());
       if (!group.canInteract(event.getPlayer())) {
         sendClaimAlert(event.getPlayer(), group);
         event.setCanceled(true);
@@ -94,7 +95,7 @@ public class ClaimrEvents {
 
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void bonemealEvent(BonemealEvent event) {
-    ClaimGroup group = claimdata.getGroup(event.getWorld(), event.getPos());
+    IClaimGroup group = DATA.getGroup(event.getWorld(), event.getPos());
     if (!group.canInteract(event.getPlayer())) {
       sendClaimAlert(event.getPlayer(), group);
       event.setResult(Result.DENY);
@@ -103,7 +104,7 @@ public class ClaimrEvents {
 
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void fillBucket(FillBucketEvent event) {
-    ClaimGroup group = claimdata.getGroup(event.getWorld(), new BlockPos(event.getTarget().getHitVec()));
+    IClaimGroup group = DATA.getGroup(event.getWorld(), new BlockPos(event.getTarget().getHitVec()));
     if (!group.canInteract(event.getPlayer())) {
       sendClaimAlert(event.getPlayer(), group);
       event.setResult(Result.DENY);
@@ -115,23 +116,23 @@ public class ClaimrEvents {
   public void enterChunk(EntityEvent.EnteringChunk event) {
     if (event.getEntity() instanceof PlayerEntity) {
       World world = event.getEntity().getEntityWorld();
-      BlockPos newPos = new BlockPos(event.getNewChunkX() * 16, 0, event.getNewChunkZ() * 16);
-      BlockPos oldPos = new BlockPos(event.getOldChunkX() * 16, 0, event.getOldChunkZ() * 16);
-      ClaimGroup newGroup = claimdata.getGroup(world, newPos);
-      ClaimGroup oldGroup = claimdata.getGroup(world, oldPos);
+      BlockPos newPos = new BlockPos(event.getNewChunkX() << 16, 0, event.getNewChunkZ() << 16);
+      BlockPos oldPos = new BlockPos(event.getOldChunkX() << 16, 0, event.getOldChunkZ() << 16);
+      IClaimGroup newGroup = DATA.getGroup(world, newPos);
+      IClaimGroup oldGroup = DATA.getGroup(world, oldPos);
       if (newGroup != oldGroup) {
         PlayerEntity player = (PlayerEntity) event.getEntity();
         if (newGroup == ClaimGroup.EVERYONE) {
           player.sendStatusMessage(new StringTextComponent("Entering unclaimed land"), true);
         } else {
-          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getName() + "\u00a7r's claim"), true);
+          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getId() + "\u00a7r's claim"), true);
         }
       }
     }
   }
 
-  private void sendClaimAlert(PlayerEntity player, ClaimGroup group) {
+  private void sendClaimAlert(PlayerEntity player, IClaimGroup group) {
     player.sendStatusMessage(
-        new StringTextComponent("This chunk is claimed by " + group.getName()).mergeStyle(TextFormatting.RED), true);
+        new StringTextComponent("This chunk is claimed by " + group.getId()).mergeStyle(TextFormatting.RED), true);
   }
 }

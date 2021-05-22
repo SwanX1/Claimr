@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import dev.cernavskis.claimr.Claimr;
 import dev.cernavskis.claimr.util.ClaimGroup;
 import dev.cernavskis.claimr.util.ClaimrUtil;
+import dev.cernavskis.claimr.util.IClaimGroup;
 import dev.cernavskis.claimr.util.ChunkDimPos;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -30,8 +31,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.FolderName;
 
 public class ClaimData {
-  public static final Map<String, ClaimGroup> groups = new ConcurrentHashMap<String, ClaimGroup>();
-  public Map<ChunkDimPos, ClaimGroup> data = new ConcurrentHashMap<ChunkDimPos, ClaimGroup>();
+  public static final Map<String, IClaimGroup> groups = new ConcurrentHashMap<String, IClaimGroup>();
+  public Map<ChunkDimPos, IClaimGroup> data = new ConcurrentHashMap<ChunkDimPos, IClaimGroup>();
   private static Gson GSON = new GsonBuilder().setPrettyPrinting().setLenient().serializeNulls().disableHtmlEscaping().create();
   public boolean shouldSave = false;
   private boolean initialized = false;
@@ -72,10 +73,9 @@ public class ClaimData {
           String id = entry.getKey();
           JsonObject group = entry.getValue().getAsJsonObject();
 
-          boolean personal = group.get("personal").getAsBoolean();
           UUID owner = UUID.fromString(group.get("owner").getAsString());
 
-          ClaimGroup claimgroup = ClaimGroup.getOrCreateGroup(id, owner, personal);
+          IClaimGroup claimgroup = ClaimGroup.getOrCreateGroup(id, owner);
 
           for (Map.Entry<String, JsonElement> memberentry : group.getAsJsonObject("members").entrySet()) {
             UUID member = UUID.fromString(memberentry.getKey());
@@ -89,7 +89,7 @@ public class ClaimData {
         for (Map.Entry<String, JsonElement> entry : chunkdata.entrySet()) {
           ChunkDimPos pos = ChunkDimPos.parseChunkDimPos(entry.getKey());
           String groupid = entry.getValue().getAsString();
-          ClaimGroup group = ClaimGroup.getGroup(groupid);
+          IClaimGroup group = ClaimGroup.getGroup(groupid);
 
           if (group != null) {
             data.put(pos, group);
@@ -131,12 +131,11 @@ public class ClaimData {
     groups.forEach((id, group) -> {
       JsonObject jsongroup = new JsonObject();
       JsonObject members = new JsonObject();
-      group.members.forEach((uuid, rank) -> {
+      group.getMembers().forEach((uuid, rank) -> {
         if (rank == 0) return;
         members.addProperty(uuid.toString(), rank);
       });
 
-      jsongroup.addProperty("personal", group.isPersonal());
       jsongroup.addProperty("owner", group.getOwner().toString());
       jsongroup.add("members", members);
 
@@ -158,19 +157,19 @@ public class ClaimData {
     return data.size() + groups.size();
   }
 
-  public ClaimGroup getGroup(World world, BlockPos pos) {
+  public IClaimGroup getGroup(World world, BlockPos pos) {
     return getGroup(new ChunkDimPos(world, pos));
   }
 
-  public ClaimGroup getGroup(ChunkDimPos pos) {
+  public IClaimGroup getGroup(ChunkDimPos pos) {
     return data.getOrDefault(pos, ClaimGroup.EVERYONE);
   }
 
-  public ClaimGroup setGroup(World world, BlockPos pos, ClaimGroup group) {
+  public IClaimGroup setGroup(World world, BlockPos pos, IClaimGroup group) {
     return setGroup(new ChunkDimPos(world, pos), group);
   }
 
-  public ClaimGroup setGroup(ChunkDimPos pos, ClaimGroup group) {
+  public IClaimGroup setGroup(ChunkDimPos pos, IClaimGroup group) {
     if (group == ClaimGroup.EVERYONE) {
       data.remove(pos);
       return ClaimGroup.EVERYONE;
@@ -184,16 +183,16 @@ public class ClaimData {
     return data.get(pos);
   }
 
-  public String[] getManagingGroupNames(PlayerEntity player) {
-    return getManagingGroupNames(ClaimrUtil.getUUID(player));
+  public String[] getManagingGroupIds(PlayerEntity player) {
+    return getManagingGroupIds(ClaimrUtil.getUUID(player));
   }
 
-  public String[] getManagingGroupNames(UUID uuid) {
-    Collection<ClaimGroup> managingGroups = groups.values();
+  public String[] getManagingGroupIds(UUID uuid) {
+    Collection<IClaimGroup> managingGroups = groups.values();
     managingGroups.removeIf(group -> true);
     List<String> managingGroupNames = new ArrayList<String>();
-    for (ClaimGroup group : managingGroups) {
-      managingGroupNames.add(group.getName());
+    for (IClaimGroup group : managingGroups) {
+      managingGroupNames.add(group.getId());
     }
     return managingGroupNames.toArray(new String[0]);
   }

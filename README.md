@@ -1,9 +1,9 @@
 <h1 align="center">Claimr<br>a server-side claiming mod</h1>
 
-**Idea inspired by FTB Chunks**
+**Idea inspired by FTB Chunks**<br>
 **This mod is server-side**
 
-**By contributing to this project, you agree to release your work into the public domain.**
+**By contributing to this project, you agree to release your work for this project into the public domain.**
 
 ### Data format
 This mod saves data for this mod in `world/data/claimr.json`, under the following format:
@@ -15,10 +15,9 @@ This mod saves data for this mod in `world/data/claimr.json`, under the followin
   },
   "groups": {
     "group_name": {
-      "personal": boolean,
-      "owner": uuid,
+      "owner": "0228224b-0143-489d-8ff3-60332602eb87", // UUID
       "members": {
-        "uuid": integer
+        "1fbfc08c-1e1f-4124-a56b-e4f14dae2319": 1 // Rank
       }
     }
   }
@@ -27,59 +26,47 @@ This mod saves data for this mod in `world/data/claimr.json`, under the followin
 
 <code>chunks</code> contains chunk claim data.<br>
 <code>groups</code> contains group data.<br>
-<code>group_name</code> contains information if the group is an individual or multiple players.<br>
-<code>group_name</code> will be a user-selected group name, or the UUID of the owner if the group is personal.<br>
+<code>group_name</code> will be a user-selected group name.<br>
+<code>owner</code> contains the UUID of the owner of the group<br>
 <code>members</code> contains a UUID with a rank level:<br>
   0 - No affiliation (shouldn't be present in JSON file, used internally)<br>
   1 - Can interact within the claim<br>
-  2 - Can manage members (groups only)<br>
-  3 - Is the owner (groups only)<br>
+  2 - Can manage members<br>
+  3 - Is the owner (shouldn't be present in JSON file, owner is set in the <code>owner</code> field)<br>
 
 ### Commands
 
-`>` - Redirects to another command
-`-` - Description of command
+<code>&gt;</code> - Redirects to another command<br>
+<code>-</code> - Description of command
 
-```
+<pre>
 /claimr
   > /claimr help
 
 /claimr help
   - Shows help for this mod.
 
-/claimr info [<debug>]
+/claimr info [&lt;debug&gt;]
   - Shows info about the mod
-    <debug> - boolean
+    &lt;debug&gt; - boolean
       Shows additional info,
       needs permission level 3 and above.
       Defaults to false
 
-/claimr ci
-  > /claiminfo
-
 /claimr claiminfo
-  > /claiminfo
+  &gt; /claiminfo
 
 /claimr claim
-  > /claim
+  &gt; /claim
 
 /claimr unclaim
-  > /unclaim
+  &gt; /unclaim
 
 /claimr unclaimall
-  > /unclaimall
-
-/claimr trust
-  > /trust
-
-/claimr untrust
-  > /untrust
-
-/claimr listtrusted
-  > /listtrusted
+  &gt; /unclaimall
 
 /claimr group
-  > /group
+  &gt; /group
 
 /claiminfo             
   - Shows info about the chunk at your posisition.
@@ -91,42 +78,30 @@ This mod saves data for this mod in `world/data/claimr.json`, under the followin
       Chunk Location: minecraft:overworld;6:-9
       Claimed by: SwanX1
 
-/ci
-  > /claiminfo
-
-/claim [<group>]
+/claim &lt;group&gt;
   - Claims the current chunk,
     throws error if you aren't a manager of the group
     or if the chunk is already claimed.
-    <group> - string;
+    &lt;group&gt; - string;
       Determines the group you are claiming this chunk for.
-      Defaults to player uuid
 
-/unclaim [<group>]
+/unclaim
 - Unclaims the current chunk, 
   throws error if you aren't a manager of the group
   or if the chunk is not claimed by the group.
-  <group> - string;
-    Determines the group you are unclaiming this chunk from.
-    Defaults to player uuid
 
-/unclaimall [<group>]
+/unclaimall &lt;group&gt;
 - Unclaims all chunks claimed by the group,
   throws error if you aren't a manager of the group.
-  <group> - string;
+  &lt;group&gt; - string;
   Determines the group you are unclaiming this chunk from.
-  Defaults to player uuid
 
-/trust <...players>
-- Adds players as interactors to your personal claim.
-
-/untrust <...players>
-- Removes players as interactors from your personal claim.
-
-/listtrusted
-- Lists interactors of your personal claim.
-
-/group create <group>
+/group create &lt;group&gt;
 - Creates a group,
   throws error if group already exists.
-```
+
+/group add &lt;group&gt; &lt;...players&gt;
+- Adds members to group, will not overwrite rank,
+  throws error if group doesn't exist
+  or if your rank is too low (needs to be >1)
+</pre>
