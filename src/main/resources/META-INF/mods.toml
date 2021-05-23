@@ -5,7 +5,7 @@ issueTrackerURL = "https://github.com/SwanX1/Claimr/issues"
 
 [[mods]]
 modId = "claimr"
-version = "1.1.4"
+version = "1.1.5"
 displayName = "Claimr"
 updateJSONURL = "https://cernavskis.dev/api/claimr.json"
 displayURL = "https://github.com/SwanX1/Claimr"

@@ -2,6 +2,9 @@
 package dev.cernavskis.claimr;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -13,6 +16,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
+import dev.cernavskis.claimr.data.ClaimData;
 import dev.cernavskis.claimr.util.ChunkDimPos;
 import dev.cernavskis.claimr.util.ClaimGroup;
 import dev.cernavskis.claimr.util.ClaimrUtil;
@@ -27,6 +31,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 
 public class ClaimrCommands {
+  // Used for /group disband
+  private static Set<String> askedToDisband = new HashSet<String>();
+
   public static CompletableFuture<Suggestions> suggestManagingGroups(CommandContext<CommandSource> context, SuggestionsBuilder suggestions) throws CommandSyntaxException {
     return ISuggestionProvider.suggest(Claimr.DATA.getManagingGroupNames(context.getSource().asPlayer()), suggestions);
   }
@@ -163,6 +170,30 @@ public class ClaimrCommands {
                   )
               )
           )
+          .then(
+            Commands.literal("disband")
+              .then(
+                Commands.argument("group", StringArgumentType.word())
+                  .suggests(ClaimrCommands::suggestOwningGroups)
+                    .executes(context ->
+                      groupDisband(
+                        context,
+                        StringArgumentType.getString(context, "group"),
+                        false
+                      )
+                    )
+                    .then(
+                      Commands.literal("confirm")
+                        .executes(context ->
+                          groupDisband(
+                            context,
+                            StringArgumentType.getString(context, "group"),
+                            true
+                          )
+                        )
+                    )
+              )
+          )
       );
 
     LiteralCommandNode<CommandSource> baseCommand =
@@ -188,6 +219,46 @@ public class ClaimrCommands {
           .then(unclaimAllCommand)    // /claimr unclaimall  -> /unclaimall
           .then(groupCommand)         // /claimr group       -> /group
       );
+  }
+
+  private static int groupDisband(CommandContext<CommandSource> context, String name, boolean confirm) throws CommandSyntaxException {
+    CommandSource source = context.getSource();
+    IClaimGroup group = ClaimGroup.getGroup(name);
+    if (group != null) {
+      PlayerEntity executingPlayer = source.asPlayer();
+      if (group.isOwner(executingPlayer)) {
+        if (confirm) {
+          if (askedToDisband.contains(name)) {
+            source.sendFeedback(new StringTextComponent("Disbanding group."), false);
+            // Remove all claimed chunks from data
+            Claimr.DATA.data.forEach((pos, iteratedgroup) -> {
+              if (iteratedgroup.equals(group)) {
+                Claimr.DATA.setGroup(pos, ClaimGroup.EVERYONE);
+              }
+            });
+            ClaimData.groups.remove(group.getName());
+            Claimr.DATA.shouldSave = true;
+            source.sendFeedback(new StringTextComponent("Group " + group.getName() + " disbanded!"), false);
+            askedToDisband.remove(name);
+            return 1;
+          } else {
+            source.sendErrorMessage(new StringTextComponent("Please type /group disband " + name + " first."));
+            return 0;
+          }
+        } else {
+          askedToDisband.add(name);
+          source.sendFeedback(new StringTextComponent("WARNING: This action is irreversible!"), false);
+          source.sendFeedback(new StringTextComponent("Please confirm this action by typing /group disband " + name + " confirm"), false);
+          return 2;
+        }
+      } else {
+        source.sendErrorMessage(new StringTextComponent("You are not the group owner!"));
+        return 0;
+      }
+    } else {
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " doesn't exist!"));
+      return 0;
+    }
   }
 
   private static int groupTransferOwnership(CommandContext<CommandSource> context, String name, ServerPlayerEntity player) throws CommandSyntaxException {
@@ -370,7 +441,7 @@ public class ClaimrCommands {
     if (group.canManage(source.asPlayer())) {
       final int startSize = Claimr.DATA.data.size();
       Claimr.DATA.data.forEach((pos, iteratedgroup) -> {
-        if (iteratedgroup == group) {
+        if (iteratedgroup.equals(group)) {
           Claimr.DATA.setGroup(pos, ClaimGroup.EVERYONE);
         }
       });
