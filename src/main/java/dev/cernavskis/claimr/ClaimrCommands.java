@@ -146,6 +146,23 @@ public class ClaimrCommands {
                   )
               )
           )
+          .then(
+            Commands.literal("transferownership")
+              .then(
+                Commands.argument("group", StringArgumentType.word())
+                  .suggests(ClaimrCommands::suggestOwningGroups)
+                  .then(
+                    Commands.argument("player", EntityArgument.player())
+                      .executes(context ->
+                        groupTransferOwnership(
+                          context,
+                          StringArgumentType.getString(context, "group"),
+                          EntityArgument.getPlayer(context, "player")
+                        )
+                      )
+                  )
+              )
+          )
       );
 
     LiteralCommandNode<CommandSource> baseCommand =
@@ -171,6 +188,26 @@ public class ClaimrCommands {
           .then(unclaimAllCommand)    // /claimr unclaimall  -> /unclaimall
           .then(groupCommand)         // /claimr group       -> /group
       );
+  }
+
+  private static int groupTransferOwnership(CommandContext<CommandSource> context, String name, ServerPlayerEntity player) throws CommandSyntaxException {
+    CommandSource source = context.getSource();
+    IClaimGroup group = ClaimGroup.getGroup(name);
+    if (group != null) {
+      PlayerEntity executingPlayer = source.asPlayer();
+      if (group.isOwner(executingPlayer)) {
+        group.setOwner(player);
+        group.setRank(executingPlayer, 2);
+        source.sendFeedback(new StringTextComponent("Player " + ClaimrUtil.getPlayerName(player, true) + " is now the owner of \u00a76" + group.getName() + "\u00a7r"), false);
+        return 1;
+      } else {
+        source.sendErrorMessage(new StringTextComponent("You are not the group owner!"));
+        return 0;
+      }
+    } else {
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " doesn't exist!"));
+      return 0;
+    }
   }
 
   private static int groupAddMember(CommandContext<CommandSource> context, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {

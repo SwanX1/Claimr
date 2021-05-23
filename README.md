@@ -119,4 +119,9 @@ This mod saves data for this mod in `world/data/claimr.json`, under the followin
 - Demotes members in group,
   throws error if group doesn't exist
   or if your rank is too low (needs to be >2)
+
+/group transferownership &lt;group&gt; &lt;player&gt;
+- Transfers ownership of group to new player, you stay as group manager,
+  throws error if group doesn't exist
+  or if your rank is too low (needs to be >2)
 </pre>
