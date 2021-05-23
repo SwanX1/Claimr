@@ -28,11 +28,11 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class ClaimrCommands {
   public static CompletableFuture<Suggestions> suggestManagingGroups(CommandContext<CommandSource> context, SuggestionsBuilder suggestions) throws CommandSyntaxException {
-    return ISuggestionProvider.suggest(Claimr.DATA.getManagingGroupIds(context.getSource().asPlayer()), suggestions);
+    return ISuggestionProvider.suggest(Claimr.DATA.getManagingGroupNames(context.getSource().asPlayer()), suggestions);
   }
   
   public static CompletableFuture<Suggestions> suggestOwningGroups(CommandContext<CommandSource> context, SuggestionsBuilder suggestions) throws CommandSyntaxException {
-    return ISuggestionProvider.suggest(Claimr.DATA.getOwningGroupIds(context.getSource().asPlayer()), suggestions);
+    return ISuggestionProvider.suggest(Claimr.DATA.getOwningGroupNames(context.getSource().asPlayer()), suggestions);
   }
 
   public static void registerCommands(CommandDispatcher<CommandSource> dispatcher) {
@@ -173,9 +173,9 @@ public class ClaimrCommands {
       );
   }
 
-  private static int groupAddMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+  private static int groupAddMember(CommandContext<CommandSource> context, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
     CommandSource source = context.getSource();
-    IClaimGroup group = ClaimGroup.getGroup(id);
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group != null) {
       PlayerEntity executingPlayer = source.asPlayer();
       if (group.canManage(executingPlayer)) {
@@ -201,14 +201,14 @@ public class ClaimrCommands {
         return 0;
       }
     } else {
-      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " doesn't exist!"));
       return 0;
     }
   }
   
-  private static int groupRemoveMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+  private static int groupRemoveMember(CommandContext<CommandSource> context, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
     CommandSource source = context.getSource();
-    IClaimGroup group = ClaimGroup.getGroup(id);
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group != null) {
       PlayerEntity executingPlayer = source.asPlayer();
       if (group.canManage(executingPlayer)) {
@@ -234,14 +234,14 @@ public class ClaimrCommands {
         return 0;
       }
     } else {
-      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " doesn't exist!"));
       return 0;
     }
   }
   
-  private static int groupPromoteMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+  private static int groupPromoteMember(CommandContext<CommandSource> context, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
     CommandSource source = context.getSource();
-    IClaimGroup group = ClaimGroup.getGroup(id);
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group != null) {
       PlayerEntity executingPlayer = source.asPlayer();
       if (group.isOwner(executingPlayer)) {
@@ -267,14 +267,14 @@ public class ClaimrCommands {
         return 0;
       }
     } else {
-      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " doesn't exist!"));
       return 0;
     }
   }
 
-  private static int groupDemoteMember(CommandContext<CommandSource> context, String id, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+  private static int groupDemoteMember(CommandContext<CommandSource> context, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
     CommandSource source = context.getSource();
-    IClaimGroup group = ClaimGroup.getGroup(id);
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group != null) {
       PlayerEntity executingPlayer = source.asPlayer();
       if (group.isOwner(executingPlayer)) {
@@ -300,17 +300,17 @@ public class ClaimrCommands {
         return 0;
       }
     } else {
-      source.sendErrorMessage(new StringTextComponent("The group " + id + " doesn't exist!"));
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " doesn't exist!"));
       return 0;
     }
   }
 
-  private static int groupCreate(CommandContext<CommandSource> context, String id) throws CommandSyntaxException {
+  private static int groupCreate(CommandContext<CommandSource> context, String name) throws CommandSyntaxException {
     CommandSource source = context.getSource();
-    IClaimGroup group = ClaimGroup.getGroup(id);
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group == null) {
-      group = ClaimGroup.getOrCreateGroup(id, source.asPlayer());
-      source.sendFeedback(new StringTextComponent("Created a new group with the name " + group.getId()), false);
+      group = ClaimGroup.getOrCreateGroup(name, source.asPlayer());
+      source.sendFeedback(new StringTextComponent("Created a new group with the name " + group.getName()), false);
       return 1;
     } else {
       source.sendErrorMessage(new StringTextComponent("The name you provided is already in use."));
@@ -318,11 +318,11 @@ public class ClaimrCommands {
     }
   }
 
-  private static int unclaimall(CommandContext<CommandSource> context, String id) throws CommandSyntaxException {
+  private static int unclaimall(CommandContext<CommandSource> context, String name) throws CommandSyntaxException {
     CommandSource source = context.getSource();
-    IClaimGroup group = ClaimGroup.getGroup(id);
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group == null) {
-      source.sendErrorMessage(new StringTextComponent("The group " + id + " does not exist!"));
+      source.sendErrorMessage(new StringTextComponent("The group " + name + " does not exist!"));
       return 0;
     }
     return unclaimall(context, group);
@@ -368,10 +368,10 @@ public class ClaimrCommands {
       return 0;
     }
   }
-  private static int claim(CommandContext<CommandSource> context, String id) throws CommandSyntaxException {
-    IClaimGroup group = ClaimGroup.getGroup(id);
+  private static int claim(CommandContext<CommandSource> context, String name) throws CommandSyntaxException {
+    IClaimGroup group = ClaimGroup.getGroup(name);
     if (group == null) {
-      context.getSource().sendErrorMessage(new StringTextComponent("The group " + id + " does not exist!"));
+      context.getSource().sendErrorMessage(new StringTextComponent("The group " + name + " does not exist!"));
       return 0;
     } else {
       return claim(context, group);
@@ -390,7 +390,7 @@ public class ClaimrCommands {
     if (oldGroup == ClaimGroup.EVERYONE) {
       if (group.canManage(source.asPlayer())) {
         Claimr.DATA.setGroup(pos, group);
-        source.sendFeedback(new StringTextComponent("Claimed chunk [" + pos.toString() + "] for " + group.getId()),
+        source.sendFeedback(new StringTextComponent("Claimed chunk [" + pos.toString() + "] for " + group.getName()),
             false);
         return 1;
       } else {
@@ -411,7 +411,7 @@ public class ClaimrCommands {
     if (group == ClaimGroup.EVERYONE) {
       source.sendFeedback(new StringTextComponent("This chunk is unclaimed"), false);
     } else {
-      source.sendFeedback(new StringTextComponent("Claimed by " + group.getId()), false);
+      source.sendFeedback(new StringTextComponent("Claimed by " + group.getName()), false);
     }
     return 1;
   }

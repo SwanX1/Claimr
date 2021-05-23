@@ -17,37 +17,46 @@ import net.minecraft.util.Util;
 public class ClaimGroup implements IClaimGroup {
   public static final IClaimGroup EVERYONE = new EveryoneClaimGroup();
   public Map<UUID, Integer> members = new HashMap<UUID, Integer>();
-  private final String id;
-  private final UUID owner;
+  private final String name;
+  private UUID owner;
 
-  protected ClaimGroup(String idIn, UUID uuid) {
-    id = idIn;
-    owner = uuid;
+  protected ClaimGroup(String nameIn, UUID ownerUUID) {
+    name = nameIn;
+    owner = ownerUUID;
   }
 
   @Nullable
-  public static IClaimGroup getGroup(String id) {
-    return ClaimData.groups.get(id);
+  public static IClaimGroup getGroup(String name) {
+    return ClaimData.groups.get(name);
   }
 
-  public static IClaimGroup getOrCreateGroup(String id, PlayerEntity owner) {
-    return getOrCreateGroup(id, ClaimrUtil.getUUID(owner));
+  public static IClaimGroup getOrCreateGroup(String name, PlayerEntity owner) {
+    return getOrCreateGroup(name, ClaimrUtil.getUUID(owner));
   }
 
-  public static IClaimGroup getOrCreateGroup(String id, UUID owner) {
-    if (!ClaimData.groups.containsKey(id)) {
+  public static IClaimGroup getOrCreateGroup(String name, UUID owner) {
+    if (!ClaimData.groups.containsKey(name)) {
       Claimr.DATA.shouldSave = true;
-      ClaimData.groups.put(id, new ClaimGroup(id, owner));
+      ClaimData.groups.put(name, new ClaimGroup(name, owner));
     }
-    return ClaimData.groups.get(id);
+    return ClaimData.groups.get(name);
   }
 
-  public String getId() {
-    return id;
+  public String getName() {
+    return name;
   }
 
   public UUID getOwner() {
     return owner;
+  }
+
+  public UUID setOwner(PlayerEntity player) {
+    return setOwner(ClaimrUtil.getUUID(player));
+  }
+
+  public UUID setOwner(UUID uuid) {
+    this.owner = uuid;
+    return this.owner;
   }
 
   public int getMembersSize() {
@@ -113,7 +122,7 @@ public class ClaimGroup implements IClaimGroup {
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof ClaimGroup) {
-      return this.id == ((ClaimGroup) obj).id;
+      return this.name == ((ClaimGroup) obj).name;
     } else {
       return false;
     }
@@ -121,7 +130,7 @@ public class ClaimGroup implements IClaimGroup {
 
   @Override
   public String toString() {
-    return String.format("{ClaimGroup \"%s\"; %s Members}", getId(), getMembersSize());
+    return String.format("{ClaimGroup \"%s\"; %s Members}", getName(), getMembersSize());
   }
 
   public ImmutableMap<UUID, Integer> getMembers() {
@@ -132,11 +141,11 @@ public class ClaimGroup implements IClaimGroup {
    * Utility class for a static field that allows everyone to interact with a claim, but no one to edit it.
    */
   private static final class EveryoneClaimGroup implements IClaimGroup {
-    private String id;
+    private String name;
 
     public EveryoneClaimGroup() {
-      this.id = "everyone";
-      ClaimData.groups.put(this.getId(), this);
+      this.name = "everyone";
+      ClaimData.groups.put(this.getName(), this);
     }
 
     @Override
@@ -195,12 +204,22 @@ public class ClaimGroup implements IClaimGroup {
     }
 
     @Override
-    public String getId() {
-      return this.id;
+    public String getName() {
+      return this.name;
     }
 
     @Override
     public UUID getOwner() {
+      return Util.DUMMY_UUID;
+    }
+
+    @Override
+    public UUID setOwner(PlayerEntity player) {
+      return Util.DUMMY_UUID;
+    }
+
+    @Override
+    public UUID setOwner(UUID uuid) {
       return Util.DUMMY_UUID;
     }
 

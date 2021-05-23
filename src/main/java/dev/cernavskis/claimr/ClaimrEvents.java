@@ -125,7 +125,7 @@ public class ClaimrEvents {
         if (newGroup == ClaimGroup.EVERYONE) {
           player.sendStatusMessage(new StringTextComponent("Entering unclaimed land"), true);
         } else {
-          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getId() + "\u00a7r's claim"), true);
+          player.sendStatusMessage(new StringTextComponent("Entering \u00a76" + newGroup.getName() + "\u00a7r's claim"), true);
         }
       }
     }
@@ -133,6 +133,6 @@ public class ClaimrEvents {
 
   private void sendClaimAlert(PlayerEntity player, IClaimGroup group) {
     player.sendStatusMessage(
-        new StringTextComponent("This chunk is claimed by " + group.getId()).mergeStyle(TextFormatting.RED), true);
+        new StringTextComponent("This chunk is claimed by " + group.getName()).mergeStyle(TextFormatting.RED), true);
   }
 }

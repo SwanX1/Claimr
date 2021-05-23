@@ -12,9 +12,11 @@ import net.minecraft.entity.player.PlayerEntity;
  * @author SwanX1
  */
 public interface IClaimGroup {
-  public String getId();
+  public String getName();
 
   public UUID getOwner();
+  public UUID setOwner(PlayerEntity player);
+  public UUID setOwner(UUID uuid);
   public int getMembersSize();
   public ImmutableMap<UUID, Integer> getMembers();
 

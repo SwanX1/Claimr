@@ -71,12 +71,12 @@ public class ClaimData {
         JsonObject groupdata = jsondata.getAsJsonObject("groups");
 
         for (Map.Entry<String, JsonElement> entry : groupdata.entrySet()) {
-          String id = entry.getKey();
+          String name = entry.getKey();
           JsonObject group = entry.getValue().getAsJsonObject();
 
           UUID owner = UUID.fromString(group.get("owner").getAsString());
 
-          IClaimGroup claimgroup = ClaimGroup.getOrCreateGroup(id, owner);
+          IClaimGroup claimgroup = ClaimGroup.getOrCreateGroup(name, owner);
 
           for (Map.Entry<String, JsonElement> memberentry : group.getAsJsonObject("members").entrySet()) {
             UUID member = UUID.fromString(memberentry.getKey());
@@ -89,13 +89,13 @@ public class ClaimData {
 
         for (Map.Entry<String, JsonElement> entry : chunkdata.entrySet()) {
           ChunkDimPos pos = ChunkDimPos.parseChunkDimPos(entry.getKey());
-          String groupid = entry.getValue().getAsString();
-          IClaimGroup group = ClaimGroup.getGroup(groupid);
+          String groupname = entry.getValue().getAsString();
+          IClaimGroup group = ClaimGroup.getGroup(groupname);
 
           if (group != null) {
             data.put(pos, group);
           } else {
-            Claimr.LOGGER.error("Undefined group given: \"" + groupid + "\" for chunk [" + pos.toString() + "]");
+            Claimr.LOGGER.error("Undefined group given: \"" + groupname + "\" for chunk [" + pos.toString() + "]");
           }
         }
         initialized = true;
@@ -123,13 +123,13 @@ public class ClaimData {
     JsonObject chunkdata = new JsonObject();
     data.forEach((pos, group) -> {
       if (group != ClaimGroup.EVERYONE) {
-        chunkdata.addProperty(pos.toString(), group.getId());
+        chunkdata.addProperty(pos.toString(), group.getName());
       }
     });
     jsondata.add("chunks", chunkdata);
 
     JsonObject groupdata = new JsonObject();
-    groups.forEach((id, group) -> {
+    groups.forEach((name, group) -> {
       JsonObject jsongroup = new JsonObject();
       JsonObject members = new JsonObject();
       group.getMembers().forEach((uuid, rank) -> {
@@ -140,7 +140,7 @@ public class ClaimData {
       jsongroup.addProperty("owner", group.getOwner().toString());
       jsongroup.add("members", members);
 
-      groupdata.add(id, jsongroup);
+      groupdata.add(name, jsongroup);
     });
     jsondata.add("groups", groupdata);
 
@@ -184,32 +184,32 @@ public class ClaimData {
     return data.get(pos);
   }
 
-  public String[] getManagingGroupIds(PlayerEntity player) {
-    return getManagingGroupIds(ClaimrUtil.getUUID(player));
+  public String[] getManagingGroupNames(PlayerEntity player) {
+    return getManagingGroupNames(ClaimrUtil.getUUID(player));
   }
 
-  public String[] getManagingGroupIds(UUID uuid) {
-    return getGroupIds(group -> group.canManage(uuid));
+  public String[] getManagingGroupNames(UUID uuid) {
+    return getGroupNames(group -> group.canManage(uuid));
   }
 
-  public String[] getOwningGroupIds(PlayerEntity player) {
-    return getOwningGroupIds(ClaimrUtil.getUUID(player));
+  public String[] getOwningGroupNames(PlayerEntity player) {
+    return getOwningGroupNames(ClaimrUtil.getUUID(player));
   }
 
-  public String[] getOwningGroupIds(UUID uuid) {
-    return getGroupIds(group -> group.isOwner(uuid));
+  public String[] getOwningGroupNames(UUID uuid) {
+    return getGroupNames(group -> group.isOwner(uuid));
   }
 
-  public String[] getGroupIds() {
-    return getGroupIds(group -> true);
+  public String[] getGroupNames() {
+    return getGroupNames(group -> true);
   }
 
-  public String[] getGroupIds(Predicate<IClaimGroup> filter) {
+  public String[] getGroupNames(Predicate<IClaimGroup> filter) {
     Collection<IClaimGroup> managingGroups = groups.values();
     managingGroups.removeIf(filter.negate());
     List<String> managingGroupNames = new ArrayList<String>();
     for (IClaimGroup group : managingGroups) {
-      managingGroupNames.add(group.getId());
+      managingGroupNames.add(group.getName());
     }
     return managingGroupNames.toArray(new String[0]);
   }
