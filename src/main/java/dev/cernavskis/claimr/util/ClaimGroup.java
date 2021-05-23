@@ -87,6 +87,7 @@ public class ClaimGroup implements IClaimGroup {
    */
   public UUID setOwner(UUID uuid) {
     this.owner = uuid;
+    Claimr.DATA.shouldSave = true;
     return this.owner;
   }
 
@@ -184,6 +185,7 @@ public class ClaimGroup implements IClaimGroup {
       } else {
         members.put(uuid, rank);
       }
+      Claimr.DATA.shouldSave = true;
       return rank;
     }
   }
